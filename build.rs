@@ -35,15 +35,16 @@ impl BuildContext {
 
         println!("cargo:rustc-link-lib=pthread");
         cc::Build::new()
-            .file(self.libdir_path.join("ggml.c"))
-            .out_dir(&self.out_path)
-            .compile("llama-c");
-        cc::Build::new()
+            .compiler("clang")
             .cpp(true)
+            .flag("-O3")
+            .flag("-march=native")
+            .flag("-mtune=native")
+            .file(self.libdir_path.join("ggml.c"))
             .file(self.libdir_path.join("llama.cpp"))
             .out_dir(&self.out_path)
             .compile("llama-cpp");
-        println!("cargo:rustc-link-lib=static=llama-c");
+        // println!("cargo:rustc-link-lib=static=llama-c");
         println!("cargo:rustc-link-lib=static=llama-cpp");
     }
 
