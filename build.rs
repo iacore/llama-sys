@@ -34,13 +34,18 @@ impl BuildContext {
         );
 
         println!("cargo:rustc-link-lib=pthread");
+        println!("cargo:rustc-link-arg=-flto");
         cc::Build::new()
+            .compiler("clang")
             .file(self.libdir_path.join("ggml.c"))
+            .flag("-flto=thin")
             .out_dir(&self.out_path)
             .compile("llama-c");
         cc::Build::new()
+            .compiler("clang++")
             .cpp(true)
             .file(self.libdir_path.join("llama.cpp"))
+            .flag("-flto=thin")
             .out_dir(&self.out_path)
             .compile("llama-cpp");
         println!("cargo:rustc-link-lib=static=llama-c");
