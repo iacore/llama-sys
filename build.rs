@@ -19,7 +19,6 @@ fn main() {
 
     ctx.build_library();
     ctx.generate_bindings();
-    println!("cargo:rustc-link-lib=static=llama");
 }
 
 struct BuildContext {
@@ -35,17 +34,17 @@ impl BuildContext {
         );
 
         println!("cargo:rustc-link-lib=pthread");
-
+        cc::Build::new()
+            .file(self.libdir_path.join("ggml.c"))
+            .out_dir(&self.out_path)
+            .compile("llama-c");
         cc::Build::new()
             .cpp(true)
             .file(self.libdir_path.join("llama.cpp"))
             .out_dir(&self.out_path)
-            .compile("llama-b");
-
-        cc::Build::new()
-            .file(self.libdir_path.join("ggml.c"))
-            .out_dir(&self.out_path)
-            .compile("llama-a");
+            .compile("llama-cpp");
+        println!("cargo:rustc-link-lib=static=llama-c");
+        println!("cargo:rustc-link-lib=static=llama-cpp");
     }
 
     fn generate_bindings(&self) {
